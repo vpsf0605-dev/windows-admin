@@ -1,27 +1,39 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>ZUNRDP | ADMIN</title>
+    <title>ZUNRDP | Admin Master</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>body { background: #020205; color: white; font-family: sans-serif; }</style>
 </head>
-<body class="p-10">
-    <div class="max-w-4xl mx-auto">
-        <h1 class="text-2xl font-black text-yellow-500 mb-10 italic">ADMIN CONTROL PANEL</h1>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-            <div class="bg-gray-900/50 p-6 rounded-2xl border border-white/5">
-                <h3 class="text-sm font-bold text-blue-400 mb-4 uppercase">Thêm Thành Viên</h3>
-                <div class="space-y-3">
-                    <input type="text" id="au" placeholder="Username" class="w-full p-3 bg-black rounded-xl border border-gray-800">
-                    <input type="text" id="ap" placeholder="Password" class="w-full p-3 bg-black rounded-xl border border-gray-800">
-                    <input type="text" id="at" placeholder="GitHub Token" class="w-full p-3 bg-black rounded-xl border border-gray-800">
-                    <input type="text" id="ar" placeholder="User/Repo" class="w-full p-3 bg-black rounded-xl border border-gray-800">
-                    <button onclick="save()" class="w-full py-4 bg-blue-600 rounded-xl font-bold uppercase text-xs">Cấp Key Mới</button>
+<body class="bg-[#05070a] text-gray-200 p-6 md:p-10">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-10">
+            <h1 class="text-2xl font-black text-yellow-500 italic">ADMIN PANEL</h1>
+            <button onclick="window.location.href='login.html'" class="text-xs bg-red-500/20 text-red-500 px-4 py-2 rounded-lg">Đăng xuất</button>
+        </div>
+
+        <div class="bg-gray-900/50 p-6 rounded-3xl border border-yellow-500/20 mb-10">
+            <h3 class="text-yellow-500 text-xs font-bold uppercase mb-4">Cấu hình Tailscale Cloud (Dùng cho toàn hệ thống)</h3>
+            <div class="flex gap-4">
+                <input type="text" id="ts-key" placeholder="tskey-auth-..." class="flex-1 bg-black p-4 rounded-xl border border-white/5 outline-none focus:border-yellow-500">
+                <button onclick="saveTS()" class="bg-yellow-600 px-8 rounded-xl font-bold text-black uppercase text-xs">Lưu Key</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <div class="bg-gray-900/50 p-8 rounded-3xl border border-white/5">
+                <h3 class="text-blue-400 text-xs font-bold uppercase mb-6">Cấp quyền Member</h3>
+                <div class="space-y-4">
+                    <input type="text" id="target-user" placeholder="Username cần cấp" class="w-full bg-black p-4 rounded-xl border border-white/5">
+                    <input type="text" id="gh-token" placeholder="GitHub Token" class="w-full bg-black p-4 rounded-xl border border-white/5">
+                    <input type="text" id="gh-repo" placeholder="User/Repo" class="w-full bg-black p-4 rounded-xl border border-white/5">
+                    <input type="number" id="v-limit" placeholder="Giới hạn VM" class="w-full bg-black p-4 rounded-xl border border-white/5">
+                    <button onclick="grant()" class="w-full py-4 bg-blue-600 rounded-xl font-bold text-xs uppercase italic">Xác nhận cấp Key</button>
                 </div>
             </div>
-            <div class="bg-gray-900/50 p-6 rounded-2xl border border-white/5">
-                <h3 class="text-sm font-bold text-blue-400 mb-4 uppercase">Danh sách User</h3>
-                <div id="ul" class="space-y-3"></div>
+
+            <div class="lg:col-span-2 bg-gray-900/50 p-8 rounded-3xl border border-white/5">
+                <h3 class="text-blue-400 text-xs font-bold uppercase mb-6">Quản lý Thành viên</h3>
+                <div id="user-list" class="space-y-4"></div>
             </div>
         </div>
     </div>
@@ -29,38 +41,53 @@
     <script>
         const API = "https://zunrdp-default-rtdb.asia-southeast1.firebasedatabase.app";
 
-        async function save() {
-            const u = document.getElementById('au').value.toLowerCase().trim();
-            const p = document.getElementById('ap').value.trim();
-            const t = document.getElementById('at').value.trim();
-            const r = document.getElementById('ar').value.trim();
-            const key = "ZUN-" + Math.floor(1000 + Math.random() * 9000);
-            if(!u || !p || !t || !r) return alert("Thiếu info!");
-            await fetch(`${API}/users/${u}.json`, {
-                method: 'PATCH',
-                body: JSON.stringify({ password:p, token:t, repo:r, key:key, status:'active' })
-            });
-            alert("Key: " + key); load();
+        async function saveTS() {
+            const key = document.getElementById('ts-key').value.trim();
+            await fetch(`${API}/config.json`, { method:'PATCH', body: JSON.stringify({ts_key: key}) });
+            alert("Đã cập nhật Tailscale Key!");
         }
 
-        async function load() {
+        async function grant() {
+            const u = document.getElementById('target-user').value.toLowerCase().trim();
+            const t = document.getElementById('gh-token').value.trim();
+            const r = document.getElementById('gh-repo').value.trim();
+            const l = document.getElementById('v-limit').value || 1;
+            const key = "ZUN-" + Math.floor(1000 + Math.random() * 9000);
+            
+            await fetch(`${API}/users/${u}.json`, {
+                method: 'PATCH',
+                body: JSON.stringify({ token: t, repo: r, limit: parseInt(l), key: key, status: 'active' })
+            });
+            alert(`Đã cấp Key: ${key} cho ${u}`);
+            loadUsers();
+        }
+
+        async function ban(u, isBan) {
+            const status = isBan ? 'active' : 'banned';
+            await fetch(`${API}/users/${u}.json`, { method:'PATCH', body: JSON.stringify({status: status}) });
+            if(!isBan) { // Nếu ban, kill hết máy
+                const vms = await fetch(`${API}/vms.json`).then(r => r.json()) || {};
+                for(let id in vms) if(vms[id].owner === u) await fetch(`${API}/commands/${id}.json`, { method:'PUT', body: JSON.stringify({action:'stop'}) });
+            }
+            loadUsers();
+        }
+
+        async function loadUsers() {
             const users = await fetch(`${API}/users.json`).then(r => r.json()) || {};
             let h = '';
             for(let n in users) {
                 const b = users[n].status === 'banned';
-                h += `<div class="p-4 bg-black/50 rounded-xl flex justify-between items-center border border-white/5">
-                    <div><p class="font-bold ${b?'text-red-500 line-through':'text-white'}">${n}</p><p class="text-[10px] text-gray-500">${users[n].key}</p></div>
-                    <button onclick="ban('${n}', ${b})" class="px-3 py-1 rounded text-[10px] font-bold ${b?'bg-green-600':'bg-red-600'}">${b?'UNBAN':'BAN'}</button>
+                h += `<div class="p-4 bg-black/50 rounded-2xl flex justify-between items-center border border-white/5">
+                    <div><p class="font-bold ${b?'text-red-500 line-through':''}">${n.toUpperCase()}</p><p class="text-[10px] text-gray-500">Key: ${users[n].key} | Limit: ${users[n].limit}</p></div>
+                    <button onclick="ban('${n}', ${b})" class="px-4 py-2 rounded-lg text-[10px] font-bold uppercase ${b?'bg-green-600':'bg-red-600'}">${b?'Unban':'Ban'}</button>
                 </div>`;
             }
-            document.getElementById('ul').innerHTML = h;
+            document.getElementById('user-list').innerHTML = h;
+            const cfg = await fetch(`${API}/config.json`).then(r => r.json());
+            if(cfg && cfg.ts_key) document.getElementById('ts-key').value = cfg.ts_key;
         }
-
-        async function ban(n, b) {
-            await fetch(`${API}/users/${n}.json`, { method:'PATCH', body: JSON.stringify({status: b?'active':'banned'}) });
-            load();
-        }
-        load();
+        loadUsers();
     </script>
 </body>
 </html>
+
