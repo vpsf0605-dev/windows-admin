@@ -1,0 +1,84 @@
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>ZUNRDP | Member</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>body { background: #05070a; color: white; font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="p-6 md:p-12">
+    <div class="max-w-4xl mx-auto">
+        <div class="flex justify-between items-center mb-10">
+            <h2 id="hello" class="text-xl font-bold italic text-blue-400"></h2>
+            <button onclick="window.location.href='login.html'" class="text-xs text-red-500">Logout</button>
+        </div>
+
+        <div class="bg-gray-900/50 p-8 rounded-3xl border border-white/5 mb-10">
+            <p class="text-[10px] font-bold text-gray-500 uppercase mb-4 text-center">Nhập mã Key ZUN-XXXX để tạo máy ảo</p>
+            <div class="flex gap-4">
+                <input type="text" id="k" placeholder="ZUN-XXXX" class="flex-1 bg-black p-4 rounded-xl border border-white/5 outline-none text-center font-bold text-blue-400">
+                <button onclick="create()" id="btn" class="bg-blue-600 px-10 rounded-xl font-black text-xs uppercase italic">Tạo máy ngay</button>
+            </div>
+        </div>
+
+        <div id="vm-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+    </div>
+
+    <script>
+        const API = "https://zunrdp-default-rtdb.asia-southeast1.firebasedatabase.app";
+        const user = localStorage.getItem('user');
+
+        async function create() {
+            const key = document.getElementById('k').value.trim();
+            const btn = document.getElementById('btn');
+            const [me, config, vms] = await Promise.all([
+                fetch(`${API}/users/${user}.json`).then(r => r.json()),
+                fetch(`${API}/config.json`).then(r => r.json()),
+                fetch(`${API}/vms.json`).then(r => r.json())
+            ]);
+
+            if(key !== me.key) return alert("Sai mã Key!");
+            const myVMs = Object.values(vms || {}).filter(v => v.owner === user).length;
+            if(myVMs >= me.limit) return alert("Bạn đã đạt giới hạn máy ảo!");
+
+            btn.innerText = "STARTING...";
+            const res = await fetch(`https://api.github.com/repos/${me.repo}/actions/workflows/vm.yml/dispatches`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${me.token}`, 'Accept': 'application/vnd.github.v3+json' },
+                body: JSON.stringify({ ref: 'main', inputs: { owner_name: user, ts_key: config.ts_key, access_key: "ADMIN" } })
+            });
+            if(res.ok) alert("🚀 Đang khởi tạo Windows VM!");
+            btn.innerText = "TẠO MÁY NGAY";
+        }
+
+        function loop() {
+            setInterval(async () => {
+                const vms = await fetch(`${API}/vms.json`).then(r => r.json()) || {};
+                let h = '';
+                for(let id in vms) {
+                    if(vms[id].owner !== user) continue;
+                    const v = vms[id];
+                    h += `<div class="bg-gray-900/80 p-6 rounded-3xl border-l-4 border-blue-500">
+                        <div class="flex justify-between mb-4"><span class="font-bold text-blue-400">${v.id}</span><span class="text-[10px] text-green-500">RUNNING</span></div>
+                        <div class="space-y-2 mb-4">
+                            <div class="flex justify-between text-[10px]"><span>CPU: ${v.cpu}%</span><span>RAM: ${v.ram}%</span></div>
+                            <div class="h-1 bg-white/5 rounded-full overflow-hidden"><div class="bg-blue-500 h-full" style="width:${v.cpu}%"></div></div>
+                        </div>
+                        <div class="bg-black/50 p-4 rounded-xl text-[11px] font-mono border border-white/5">
+                            <p class="text-blue-300">IP: ${v.ip}</p>
+                            <p class="text-gray-500">U: ${v.user} | P: <span class="text-yellow-500">${v.pass}</span></p>
+                        </div>
+                        <button onclick="kill('${id}')" class="w-full mt-4 py-2 bg-red-500/10 text-red-500 rounded-lg text-[10px] font-bold border border-red-500/10">KILL VM</button>
+                    </div>`;
+                }
+                document.getElementById('vm-list').innerHTML = h;
+            }, 5000);
+        }
+        async function kill(id) {
+            await fetch(`${API}/commands/${id}.json`, { method:'PUT', body: JSON.stringify({action:'stop'}) });
+            alert("Lệnh tắt đã gửi!");
+        }
+        document.getElementById('hello').innerText = `MEMBER: ${user.toUpperCase()}`;
+        loop();
+    </script>
+</body>
+</html>
