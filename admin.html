@@ -1,92 +1,130 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>ZUNRDP | Admin Master</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control | ZUNRDP</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #02040a; color: #fff; font-family: sans-serif; }
+        .glass-panel { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; }
+        input { background: #000 !important; border: 1px solid #333 !important; }
+    </style>
 </head>
-<body class="bg-[#05070a] text-gray-200 p-6 md:p-10">
-    <div class="max-w-6xl mx-auto">
-        <div class="flex justify-between items-center mb-10">
-            <h1 class="text-2xl font-black text-yellow-500 italic">ADMIN PANEL</h1>
-            <button onclick="window.location.href='login.html'" class="text-xs bg-red-500/20 text-red-500 px-4 py-2 rounded-lg">Đăng xuất</button>
-        </div>
-
-        <div class="bg-gray-900/50 p-6 rounded-3xl border border-yellow-500/20 mb-10">
-            <h3 class="text-yellow-500 text-xs font-bold uppercase mb-4">Cấu hình Tailscale Cloud (Dùng cho toàn hệ thống)</h3>
-            <div class="flex gap-4">
-                <input type="text" id="ts-key" placeholder="tskey-auth-..." class="flex-1 bg-black p-4 rounded-xl border border-white/5 outline-none focus:border-yellow-500">
-                <button onclick="saveTS()" class="bg-yellow-600 px-8 rounded-xl font-bold text-black uppercase text-xs">Lưu Key</button>
-            </div>
+<body class="p-6 md:p-12">
+    <div class="max-w-7xl mx-auto">
+        <div class="flex justify-between items-center mb-16">
+            <h1 class="text-3xl font-black italic text-yellow-500">ADMIN MASTER.</h1>
+            <button onclick="location.href='index.html'" class="text-xs bg-white/5 px-4 py-2 rounded-full font-bold">LOGOUT</button>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
-            <div class="bg-gray-900/50 p-8 rounded-3xl border border-white/5">
-                <h3 class="text-blue-400 text-xs font-bold uppercase mb-6">Cấp quyền Member</h3>
-                <div class="space-y-4">
-                    <input type="text" id="target-user" placeholder="Username cần cấp" class="w-full bg-black p-4 rounded-xl border border-white/5">
-                    <input type="text" id="gh-token" placeholder="GitHub Token" class="w-full bg-black p-4 rounded-xl border border-white/5">
-                    <input type="text" id="gh-repo" placeholder="User/Repo" class="w-full bg-black p-4 rounded-xl border border-white/5">
-                    <input type="number" id="v-limit" placeholder="Giới hạn VM" class="w-full bg-black p-4 rounded-xl border border-white/5">
-                    <button onclick="grant()" class="w-full py-4 bg-blue-600 rounded-xl font-bold text-xs uppercase italic">Xác nhận cấp Key</button>
+            <div class="lg:col-span-1 space-y-6">
+                <div class="glass-panel p-8">
+                    <h3 class="text-blue-400 font-bold text-xs uppercase tracking-widest mb-6">Cấp quyền / Cấu hình User</h3>
+                    <div class="space-y-4">
+                        <input type="text" id="adm-u" placeholder="Tên User cần cấp" class="w-full p-4 rounded-2xl outline-none focus:border-blue-500 transition">
+                        <input type="text" id="adm-tk" placeholder="GitHub Token" class="w-full p-4 rounded-2xl outline-none focus:border-blue-500 transition">
+                        <input type="text" id="adm-rp" placeholder="User/Repo" class="w-full p-4 rounded-2xl outline-none focus:border-blue-500 transition">
+                        <input type="text" id="adm-ts" placeholder="Tailscale Key riêng" class="w-full p-4 rounded-2xl outline-none border-yellow-500/20 focus:border-yellow-500 transition">
+                        <input type="number" id="adm-l" placeholder="Giới hạn VM (Mặc định 1)" class="w-full p-4 rounded-2xl outline-none focus:border-blue-500 transition">
+                        <button onclick="grant()" class="w-full py-4 bg-blue-600 rounded-2xl font-bold uppercase tracking-tighter">Xác nhận cấp Access Key</button>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-8">
+                    <h3 class="text-gray-400 font-bold text-xs uppercase mb-4">Danh sách User</h3>
+                    <div id="user-list" class="space-y-3"></div>
                 </div>
             </div>
 
-            <div class="lg:col-span-2 bg-gray-900/50 p-8 rounded-3xl border border-white/5">
-                <h3 class="text-blue-400 text-xs font-bold uppercase mb-6">Quản lý Thành viên</h3>
-                <div id="user-list" class="space-y-4"></div>
+            <div class="lg:col-span-2">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-red-500 font-bold text-xs uppercase tracking-widest">Toàn bộ máy đang chạy (Live Monitor)</h3>
+                    <span id="vm-count" class="text-[10px] bg-blue-500/20 text-blue-500 px-3 py-1 rounded-full font-bold">0 Active</span>
+                </div>
+                <div id="all-vms" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
             </div>
         </div>
     </div>
 
     <script>
         const API = "https://zunrdp-default-rtdb.asia-southeast1.firebasedatabase.app";
-
-        async function saveTS() {
-            const key = document.getElementById('ts-key').value.trim();
-            await fetch(`${API}/config.json`, { method:'PATCH', body: JSON.stringify({ts_key: key}) });
-            alert("Đã cập nhật Tailscale Key!");
-        }
+        if(localStorage.getItem('role') !== 'admin') window.location.href = 'index.html';
 
         async function grant() {
-            const u = document.getElementById('target-user').value.toLowerCase().trim();
-            const t = document.getElementById('gh-token').value.trim();
-            const r = document.getElementById('gh-repo').value.trim();
-            const l = document.getElementById('v-limit').value || 1;
-            const key = "ZUN-" + Math.floor(1000 + Math.random() * 9000);
-            
+            const u = document.getElementById('adm-u').value.trim().toLowerCase();
+            const t = document.getElementById('adm-tk').value.trim();
+            const r = document.getElementById('adm-rp').value.trim();
+            const ts = document.getElementById('adm-ts').value.trim();
+            const l = document.getElementById('adm-l').value || 1;
+            const key = "ZUN-" + Math.floor(Math.random()*9000 + 1000);
+
+            if(!u || !t || !ts) return alert("Vui lòng điền Username, Token và Tailscale Key!");
+
             await fetch(`${API}/users/${u}.json`, {
                 method: 'PATCH',
-                body: JSON.stringify({ token: t, repo: r, limit: parseInt(l), key: key, status: 'active' })
+                body: JSON.stringify({ token:t, repo:r, ts_key:ts, limit:parseInt(l), key:key, status:'active' })
             });
-            alert(`Đã cấp Key: ${key} cho ${u}`);
-            loadUsers();
+            alert("Đã cấp Key: " + key);
         }
 
         async function ban(u, isBan) {
             const status = isBan ? 'active' : 'banned';
             await fetch(`${API}/users/${u}.json`, { method:'PATCH', body: JSON.stringify({status: status}) });
-            if(!isBan) { // Nếu ban, kill hết máy
+            if(!isBan) {
                 const vms = await fetch(`${API}/vms.json`).then(r => r.json()) || {};
-                for(let id in vms) if(vms[id].owner === u) await fetch(`${API}/commands/${id}.json`, { method:'PUT', body: JSON.stringify({action:'stop'}) });
+                for(let id in vms) {
+                    if(vms[id].owner === u) {
+                        await fetch(`${API}/commands/${id}.json`, { method:'PUT', body: JSON.stringify({action:'stop'}) });
+                    }
+                }
+                alert(`Đã BAN ${u} và treo lệnh Kill toàn bộ máy.`);
             }
-            loadUsers();
         }
 
-        async function loadUsers() {
-            const users = await fetch(`${API}/users.json`).then(r => r.json()) || {};
-            let h = '';
-            for(let n in users) {
-                const b = users[n].status === 'banned';
-                h += `<div class="p-4 bg-black/50 rounded-2xl flex justify-between items-center border border-white/5">
-                    <div><p class="font-bold ${b?'text-red-500 line-through':''}">${n.toUpperCase()}</p><p class="text-[10px] text-gray-500">Key: ${users[n].key} | Limit: ${users[n].limit}</p></div>
-                    <button onclick="ban('${n}', ${b})" class="px-4 py-2 rounded-lg text-[10px] font-bold uppercase ${b?'bg-green-600':'bg-red-600'}">${b?'Unban':'Ban'}</button>
+        setInterval(async () => {
+            const [vms, users] = await Promise.all([
+                fetch(`${API}/vms.json`).then(r => r.json()),
+                fetch(`${API}/users.json`).then(r => r.json())
+            ]);
+
+            // Render All VMs
+            let vh = ''; let count = 0;
+            for(let id in vms) {
+                count++; const v = vms[id];
+                vh += `<div class="glass-panel p-5 border-t border-white/5">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="text-[10px] font-bold text-blue-400 font-mono">${v.id}</span>
+                        <span class="text-[9px] bg-white/5 px-2 py-0.5 rounded text-gray-400">Owner: ${v.owner}</span>
+                    </div>
+                    <div class="flex gap-4 mb-4">
+                        <div class="flex-1"><div class="text-[8px] text-gray-500 mb-1">CPU ${v.cpu}%</div><div class="h-1 bg-white/5 rounded-full"><div class="h-full bg-blue-500" style="width:${v.cpu}%"></div></div></div>
+                        <div class="flex-1"><div class="text-[8px] text-gray-500 mb-1">RAM ${v.ram}%</div><div class="h-1 bg-white/5 rounded-full"><div class="h-full bg-purple-500" style="width:${v.ram}%"></div></div></div>
+                    </div>
+                    <div class="text-[9px] font-mono bg-black/50 p-3 rounded-xl border border-white/5 text-gray-400 mb-4">
+                        IP: ${v.ip} | Pass: ${v.pass}
+                    </div>
+                    <button onclick="kill('${id}')" class="w-full py-2 bg-red-500/10 text-red-500 rounded-lg text-[10px] font-bold">KILL VM</button>
                 </div>`;
             }
-            document.getElementById('user-list').innerHTML = h;
-            const cfg = await fetch(`${API}/config.json`).then(r => r.json());
-            if(cfg && cfg.ts_key) document.getElementById('ts-key').value = cfg.ts_key;
+            document.getElementById('all-vms').innerHTML = vh;
+            document.getElementById('vm-count').innerText = `${count} Active Machines`;
+
+            // Render User List
+            let uh = '';
+            for(let n in users) {
+                const b = users[n].status === 'banned';
+                uh += `<div class="flex justify-between items-center bg-black/30 p-4 rounded-2xl border border-white/5">
+                    <div><p class="text-xs font-bold ${b?'text-red-500 line-through':'text-white'}">${n}</p><p class="text-[9px] text-gray-500">${users[n].key}</p></div>
+                    <button onclick="ban('${n}', ${b})" class="px-3 py-1 rounded-lg text-[8px] font-black uppercase ${b?'bg-green-600 text-white':'bg-red-600/20 text-red-500'}">${b?'UNBAN':'BAN'}</button>
+                </div>`;
+            }
+            document.getElementById('user-list').innerHTML = uh;
+        }, 5000);
+
+        async function kill(id) {
+            await fetch(`${API}/commands/${id}.json`, { method:'PUT', body: JSON.stringify({action:'stop'}) });
         }
-        loadUsers();
     </script>
 </body>
 </html>
