@@ -1,57 +1,70 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ZUNRDP | Terminal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background: #010309; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; }
-        .neon-border { border: 1px solid rgba(59, 130, 246, 0.2); box-shadow: 0 0 15px rgba(59, 130, 246, 0.1); }
-        .glass-panel { background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(25px); border-radius: 2.5rem; border: 1px solid rgba(255,255,255,0.05); }
-        .progress-glow { filter: drop-shadow(0 0 5px currentColor); }
-        .tab-active { color: #3b82f6; border-bottom: 2px solid #3b82f6; }
-        input::placeholder { color: #475569; }
+        body { background: #010409; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .glass-panel { background: rgba(13, 17, 23, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); border-radius: 2rem; }
+        .neon-glow { box-shadow: 0 0 20px rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.2); }
+        .stat-bar { height: 4px; border-radius: 10px; background: rgba(255,255,255,0.05); }
+        .active-tab { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
+        /* Fix lỗi Input bị lệch trên Mobile */
+        .input-group { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+        @media (min-width: 768px) { .input-group { flex-direction: row; } }
     </style>
 </head>
-<body class="p-4 md:p-10 pb-32">
-    <header class="max-w-4xl mx-auto flex justify-between items-center mb-10">
+<body class="p-4 md:p-10 pb-24">
+
+    <nav class="max-w-5xl mx-auto flex justify-between items-center mb-10">
         <div>
-            <h1 id="user-display" class="text-2xl font-black italic tracking-tighter text-blue-500">USER.</h1>
-            <p class="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Cloud Access Point</p>
+            <h1 class="text-2xl font-black tracking-tighter text-blue-500 italic">THUPHAM.</h1>
+            <p class="text-[8px] font-bold text-gray-500 uppercase tracking-[0.3em]">Cloud Access Point</p>
         </div>
-        <button onclick="location.href='index.html'" class="w-12 h-12 glass-panel flex items-center justify-center text-red-500 hover:bg-red-500/10 transition">
+        <button onclick="location.href='index.html'" class="w-10 h-10 glass-panel flex items-center justify-center text-red-500 hover:bg-red-500/10">
             <i class="fas fa-power-off"></i>
         </button>
-    </header>
+    </nav>
 
-    <div class="max-w-4xl mx-auto">
-        <div class="glass-panel p-8 mb-8 neon-border">
-            <div class="flex flex-col md:flex-row gap-6 items-center">
-                <div class="flex-1 text-center md:text-left">
-                    <h2 class="text-lg font-bold">Kích hoạt tài nguyên</h2>
-                    <p class="text-[10px] text-gray-500 uppercase font-bold tracking-tighter">Enter your unique ZUN-Key to deploy</p>
-                </div>
-                <div class="w-full md:w-auto flex gap-3">
-                    <input type="text" id="k" placeholder="ZUN-XXXX" class="flex-1 md:w-48 bg-black/60 rounded-2xl p-4 border border-white/5 outline-none font-bold text-center text-blue-400 tracking-widest focus:border-blue-500 transition">
-                    <button onclick="create()" id="btn-create" class="px-8 py-4 bg-blue-600 rounded-2xl font-black text-[10px] uppercase italic hover:bg-blue-500 shadow-lg shadow-blue-900/40">Launch</button>
-                </div>
+    <div class="max-w-5xl mx-auto">
+        <div class="glass-panel p-6 md:p-10 mb-10 neon-glow">
+            <div class="text-center mb-8">
+                <h2 class="text-xl font-bold mb-2">Kích hoạt tài nguyên</h2>
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Enter your unique ZUN-Key to deploy</p>
+            </div>
+            <div class="input-group">
+                <input type="text" id="k" placeholder="ZUN-XXXX" class="flex-1 bg-black/50 border border-white/10 rounded-2xl p-4 text-center font-bold tracking-widest text-blue-400 outline-none focus:border-blue-500 transition-all">
+                <button onclick="create()" id="btn-create" class="bg-blue-600 hover:bg-blue-500 px-10 py-4 rounded-2xl font-black text-xs uppercase italic tracking-widest shadow-lg shadow-blue-900/40 transition-all active:scale-95">
+                    Launch
+                </button>
             </div>
         </div>
 
-        <div class="flex gap-8 mb-6 px-4">
-            <span class="tab-active text-[10px] font-black uppercase tracking-widest pb-2 cursor-pointer">Active Machines</span>
-            <span class="text-gray-600 text-[10px] font-black uppercase tracking-widest pb-2 cursor-pointer">Logs</span>
+        <div class="flex gap-8 mb-8 px-2 border-b border-white/5">
+            <button class="active-tab pb-3 text-[10px] font-black uppercase tracking-widest">Active Machines</button>
+            <button class="text-gray-600 pb-3 text-[10px] font-black uppercase tracking-widest hover:text-gray-400 transition">Logs</button>
         </div>
 
-        <div id="vm-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        <div id="vm-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+    </div>
+
+    <div class="fixed bottom-6 right-6 z-50">
+        <a href="#" class="relative block w-14 h-14">
+            <img src="https://i.imgur.com/8QpYhP7.png" class="rounded-full border-2 border-blue-500 shadow-xl shadow-blue-500/20">
+            <span class="absolute -top-1 -right-1 flex h-4 w-4">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-4 w-4 bg-blue-500 border-2 border-white"></span>
+            </span>
+        </a>
     </div>
 
     <script>
         const API = "https://zunrdp-default-rtdb.asia-southeast1.firebasedatabase.app";
         const user = localStorage.getItem('user');
         if(!user) location.href = 'index.html';
-        document.getElementById('user-display').innerText = user.toUpperCase() + '.';
 
         async function create() {
             const k = document.getElementById('k').value.trim();
@@ -60,17 +73,24 @@
                 fetch(`${API}/users/${user}.json`).then(r => r.json()),
                 fetch(`${API}/vms.json`).then(r => r.json())
             ]);
+
             if(k !== me.key) return alert("Sai mã Access Key!");
             const myVMs = Object.values(vms||{}).filter(v => v.owner === user).length;
-            if(myVMs >= me.limit) return alert("Vượt quá giới hạn gói!");
+            if(myVMs >= me.limit) return alert("Bạn đã đạt giới hạn máy ảo!");
 
             btn.innerText = "DEPLOYING...";
+            btn.disabled = true;
+
             const res = await fetch(`https://api.github.com/repos/${me.repo}/actions/workflows/vm.yml/dispatches`, {
-                method:'POST', headers:{'Authorization':`Bearer ${me.token}`},
+                method:'POST',
+                headers:{'Authorization':`Bearer ${me.token}`},
                 body: JSON.stringify({ref:'main', inputs:{owner_name:user, ts_key:me.ts_key}})
             });
-            if(res.ok) alert("🚀 Máy ảo đang được dựng trên Cloud. Vui lòng chờ 3 phút!");
+
+            if(res.ok) alert("🚀 Đang khởi tạo máy ảo! Vui lòng chờ 3-5 phút.");
+            else alert("Lỗi kết nối GitHub!");
             btn.innerText = "Launch";
+            btn.disabled = false;
         }
 
         setInterval(async () => {
@@ -79,43 +99,43 @@
             for(let id in vms) {
                 if(vms[id].owner !== user) continue;
                 const v = vms[id];
+                const uptime = Math.floor((Date.now() - v.startTime) / 60000);
                 h += `
-                <div class="glass-panel p-6 border-t-2 border-blue-500/30 group animate-up">
+                <div class="glass-panel p-6 border-t-2 border-blue-500/30 animate-up">
                     <div class="flex justify-between items-center mb-6">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500 text-[10px] font-black">${v.id.slice(-2)}</div>
-                            <span class="text-[10px] font-black text-gray-400 font-mono tracking-tighter">${v.id}</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                            <span class="text-[8px] font-black uppercase text-green-500">Live</span>
+                        <span class="text-[10px] font-black text-blue-400 font-mono">${v.id}</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+                            <span class="text-[8px] font-black text-green-500">RUNNING</span>
                         </div>
                     </div>
-                    
-                    <div class="space-y-4 mb-8">
+                    <div class="space-y-4 mb-6">
                         <div>
-                            <div class="flex justify-between text-[8px] font-bold text-gray-500 mb-1 uppercase tracking-widest"><span>Processor</span><span>${v.cpu}%</span></div>
-                            <div class="h-1 bg-white/5 rounded-full overflow-hidden"><div class="progress-glow h-full bg-blue-500 text-blue-500" style="width:${v.cpu}%"></div></div>
+                            <div class="flex justify-between text-[8px] font-bold text-gray-500 mb-1 uppercase tracking-widest"><span>CPU Load</span><span>${v.cpu}%</span></div>
+                            <div class="stat-bar"><div class="h-full bg-blue-500 shadow-[0_0_10px_#3b82f6]" style="width:${v.cpu}%"></div></div>
                         </div>
                         <div>
-                            <div class="flex justify-between text-[8px] font-bold text-gray-500 mb-1 uppercase tracking-widest"><span>Memory Buffer</span><span>${v.ram}%</span></div>
-                            <div class="h-1 bg-white/5 rounded-full overflow-hidden"><div class="progress-glow h-full bg-purple-500 text-purple-500" style="width:${v.ram}%"></div></div>
+                            <div class="flex justify-between text-[8px] font-bold text-gray-500 mb-1 uppercase tracking-widest"><span>RAM Usage</span><span>${v.ram}%</span></div>
+                            <div class="stat-bar"><div class="h-full bg-purple-500 shadow-[0_0_10px_#a855f7]" style="width:${v.ram}%"></div></div>
                         </div>
                     </div>
-
-                    <div class="bg-black/60 p-4 rounded-3xl border border-white/5 text-[10px] font-mono mb-6 relative overflow-hidden">
-                        <p class="text-blue-400 mb-1"><i class="fas fa-link mr-2"></i>${v.ip}</p>
-                        <p class="text-gray-300"><i class="fas fa-user mr-2 text-gray-500"></i>${v.user}</p>
-                        <p class="text-gray-300"><i class="fas fa-key mr-2 text-gray-500"></i>${v.pass}</p>
+                    <div class="bg-black/50 p-4 rounded-2xl border border-white/5 text-[10px] font-mono mb-6 space-y-1">
+                        <p class="text-blue-400"><i class="fas fa-network-wired mr-2"></i>${v.ip}</p>
+                        <p><i class="fas fa-user mr-2 text-gray-600"></i>${v.user}</p>
+                        <p><i class="fas fa-key mr-2 text-gray-600"></i><span class="text-yellow-500">${v.pass}</span></p>
+                        <p class="text-gray-500 text-[8px] mt-2">Active: ${uptime} mins</p>
                     </div>
-
-                    <button onclick="kill('${id}')" class="w-full py-4 bg-red-500/5 text-red-500 rounded-2xl text-[9px] font-black uppercase tracking-widest border border-red-500/10 hover:bg-red-500 hover:text-white transition">Terminate Machine</button>
+                    <button onclick="kill('${id}')" class="w-full py-3 bg-red-500/10 text-red-500 rounded-xl text-[9px] font-black uppercase tracking-widest border border-red-500/10 hover:bg-red-500 hover:text-white transition-all">Kill Machine</button>
                 </div>`;
             }
-            document.getElementById('vm-list').innerHTML = h || '<div class="col-span-full text-center py-20 glass-panel italic text-xs text-gray-600">No active telemetry found. Ready for deployment.</div>';
+            document.getElementById('vm-list').innerHTML = h || '<div class="col-span-full text-center py-20 text-gray-600 text-xs italic">No active telemetry found. Ready for deployment.</div>';
         }, 5000);
 
-        async function kill(id) { if(confirm("Dừng máy này ngay lập tức?")) await fetch(`${API}/commands/${id}.json`, { method:'PUT', body: JSON.stringify({action:'stop'}) }); }
+        async function kill(id) {
+            if(confirm("Dừng máy ảo này?")) {
+                await fetch(`${API}/commands/${id}.json`, { method:'PUT', body: JSON.stringify({action:'stop'}) });
+            }
+        }
     </script>
 </body>
 </html>
