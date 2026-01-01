@@ -2,54 +2,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Control | ZUNRDP</title>
+    <title>Admin | ZUNRDP</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #02040a; color: #fff; font-family: sans-serif; }
-        .glass-panel { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; }
-        input { background: #000 !important; border: 1px solid #333 !important; }
+        body { background: #020617; color: #fff; font-family: sans-serif; }
+        .glass-card { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(15px); border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.05); }
     </style>
 </head>
-<body class="p-6 md:p-12">
-    <div class="max-w-7xl mx-auto">
-        <div class="flex justify-between items-center mb-16">
-            <h1 class="text-3xl font-black italic text-yellow-500">ADMIN MASTER.</h1>
-            <button onclick="location.href='index.html'" class="text-xs bg-white/5 px-4 py-2 rounded-full font-bold">LOGOUT</button>
+<body class="p-4 md:p-8">
+    <div class="max-w-6xl mx-auto flex justify-between items-center mb-10">
+        <h1 class="text-2xl font-black italic text-yellow-500 uppercase">Master Admin</h1>
+        <button onclick="location.href='index.html'" class="text-xs bg-red-600/20 text-red-500 px-4 py-2 rounded-full font-bold">Logout</button>
+    </div>
+
+    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-4 glass-card p-6">
+            <h3 class="text-xs font-bold text-blue-400 uppercase mb-6 tracking-widest">Cấp Access Key</h3>
+            <div class="space-y-4">
+                <input type="text" id="adm-u" placeholder="Target Username" class="w-full p-4 bg-black/40 rounded-2xl border border-white/5 outline-none">
+                <input type="text" id="adm-tk" placeholder="GitHub Token" class="w-full p-4 bg-black/40 rounded-2xl border border-white/5 outline-none">
+                <input type="text" id="adm-rp" placeholder="User/Repo" class="w-full p-4 bg-black/40 rounded-2xl border border-white/5 outline-none">
+                <input type="text" id="adm-ts" placeholder="Tailscale Key riêng" class="w-full p-4 bg-black/40 rounded-2xl border border-yellow-500/20 outline-none">
+                <input type="number" id="adm-l" placeholder="Giới hạn VM" class="w-full p-4 bg-black/40 rounded-2xl border border-white/5 outline-none">
+                <button onclick="grant()" class="w-full py-4 bg-blue-600 rounded-2xl font-black text-xs uppercase italic">Xác nhận</button>
+            </div>
+            <div id="user-list" class="mt-8 space-y-3"></div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
-            <div class="lg:col-span-1 space-y-6">
-                <div class="glass-panel p-8">
-                    <h3 class="text-blue-400 font-bold text-xs uppercase tracking-widest mb-6">Cấp quyền / Cấu hình User</h3>
-                    <div class="space-y-4">
-                        <input type="text" id="adm-u" placeholder="Tên User cần cấp" class="w-full p-4 rounded-2xl outline-none focus:border-blue-500 transition">
-                        <input type="text" id="adm-tk" placeholder="GitHub Token" class="w-full p-4 rounded-2xl outline-none focus:border-blue-500 transition">
-                        <input type="text" id="adm-rp" placeholder="User/Repo" class="w-full p-4 rounded-2xl outline-none focus:border-blue-500 transition">
-                        <input type="text" id="adm-ts" placeholder="Tailscale Key riêng" class="w-full p-4 rounded-2xl outline-none border-yellow-500/20 focus:border-yellow-500 transition">
-                        <input type="number" id="adm-l" placeholder="Giới hạn VM (Mặc định 1)" class="w-full p-4 rounded-2xl outline-none focus:border-blue-500 transition">
-                        <button onclick="grant()" class="w-full py-4 bg-blue-600 rounded-2xl font-bold uppercase tracking-tighter">Xác nhận cấp Access Key</button>
-                    </div>
-                </div>
-
-                <div class="glass-panel p-8">
-                    <h3 class="text-gray-400 font-bold text-xs uppercase mb-4">Danh sách User</h3>
-                    <div id="user-list" class="space-y-3"></div>
-                </div>
-            </div>
-
-            <div class="lg:col-span-2">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-red-500 font-bold text-xs uppercase tracking-widest">Toàn bộ máy đang chạy (Live Monitor)</h3>
-                    <span id="vm-count" class="text-[10px] bg-blue-500/20 text-blue-500 px-3 py-1 rounded-full font-bold">0 Active</span>
-                </div>
-                <div id="all-vms" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-            </div>
+        <div class="lg:col-span-8">
+            <h3 class="text-xs font-bold text-red-500 uppercase mb-6 tracking-widest">Hệ thống đang chạy</h3>
+            <div id="all-vms" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
     </div>
 
     <script>
         const API = "https://zunrdp-default-rtdb.asia-southeast1.firebasedatabase.app";
-        if(localStorage.getItem('role') !== 'admin') window.location.href = 'index.html';
+        if(!localStorage.getItem('admin')) location.href = 'index.html';
 
         async function grant() {
             const u = document.getElementById('adm-u').value.trim().toLowerCase();
@@ -58,28 +46,8 @@
             const ts = document.getElementById('adm-ts').value.trim();
             const l = document.getElementById('adm-l').value || 1;
             const key = "ZUN-" + Math.floor(Math.random()*9000 + 1000);
-
-            if(!u || !t || !ts) return alert("Vui lòng điền Username, Token và Tailscale Key!");
-
-            await fetch(`${API}/users/${u}.json`, {
-                method: 'PATCH',
-                body: JSON.stringify({ token:t, repo:r, ts_key:ts, limit:parseInt(l), key:key, status:'active' })
-            });
-            alert("Đã cấp Key: " + key);
-        }
-
-        async function ban(u, isBan) {
-            const status = isBan ? 'active' : 'banned';
-            await fetch(`${API}/users/${u}.json`, { method:'PATCH', body: JSON.stringify({status: status}) });
-            if(!isBan) {
-                const vms = await fetch(`${API}/vms.json`).then(r => r.json()) || {};
-                for(let id in vms) {
-                    if(vms[id].owner === u) {
-                        await fetch(`${API}/commands/${id}.json`, { method:'PUT', body: JSON.stringify({action:'stop'}) });
-                    }
-                }
-                alert(`Đã BAN ${u} và treo lệnh Kill toàn bộ máy.`);
-            }
+            await fetch(`${API}/users/${u}.json`, { method:'PATCH', body: JSON.stringify({token:t, repo:r, ts_key:ts, limit:parseInt(l), key:key, status:'active'}) });
+            alert("Đã cấp: " + key);
         }
 
         setInterval(async () => {
@@ -88,43 +56,42 @@
                 fetch(`${API}/users.json`).then(r => r.json())
             ]);
 
-            // Render All VMs
-            let vh = ''; let count = 0;
+            // Render Monitor
+            let vh = '';
             for(let id in vms) {
-                count++; const v = vms[id];
-                vh += `<div class="glass-panel p-5 border-t border-white/5">
-                    <div class="flex justify-between items-center mb-4">
-                        <span class="text-[10px] font-bold text-blue-400 font-mono">${v.id}</span>
-                        <span class="text-[9px] bg-white/5 px-2 py-0.5 rounded text-gray-400">Owner: ${v.owner}</span>
-                    </div>
+                const v = vms[id];
+                vh += `<div class="glass-card p-5">
+                    <div class="flex justify-between items-center mb-4"><span class="text-[10px] font-bold text-blue-400 font-mono">${v.id}</span><span class="text-[8px] bg-white/5 px-2 py-1 rounded text-gray-500 font-bold uppercase">${v.owner}</span></div>
                     <div class="flex gap-4 mb-4">
-                        <div class="flex-1"><div class="text-[8px] text-gray-500 mb-1">CPU ${v.cpu}%</div><div class="h-1 bg-white/5 rounded-full"><div class="h-full bg-blue-500" style="width:${v.cpu}%"></div></div></div>
-                        <div class="flex-1"><div class="text-[8px] text-gray-500 mb-1">RAM ${v.ram}%</div><div class="h-1 bg-white/5 rounded-full"><div class="h-full bg-purple-500" style="width:${v.ram}%"></div></div></div>
+                        <div class="flex-1"><div class="h-1 bg-white/5 rounded-full"><div class="h-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]" style="width:${v.cpu}%"></div></div></div>
+                        <div class="flex-1"><div class="h-1 bg-white/5 rounded-full"><div class="h-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.6)]" style="width:${v.ram}%"></div></div></div>
                     </div>
-                    <div class="text-[9px] font-mono bg-black/50 p-3 rounded-xl border border-white/5 text-gray-400 mb-4">
-                        IP: ${v.ip} | Pass: ${v.pass}
-                    </div>
-                    <button onclick="kill('${id}')" class="w-full py-2 bg-red-500/10 text-red-500 rounded-lg text-[10px] font-bold">KILL VM</button>
+                    <div class="text-[9px] font-mono text-gray-500 mb-4">${v.ip} | ${v.pass}</div>
+                    <button onclick="kill('${id}')" class="w-full py-2 bg-red-600/10 text-red-500 rounded-lg text-[10px] font-bold uppercase">Kill</button>
                 </div>`;
             }
-            document.getElementById('all-vms').innerHTML = vh;
-            document.getElementById('vm-count').innerText = `${count} Active Machines`;
+            document.getElementById('all-vms').innerHTML = vh || '<p class="text-xs text-gray-600 italic">No Active VMs</p>';
 
-            // Render User List
+            // Render Users
             let uh = '';
             for(let n in users) {
                 const b = users[n].status === 'banned';
-                uh += `<div class="flex justify-between items-center bg-black/30 p-4 rounded-2xl border border-white/5">
-                    <div><p class="text-xs font-bold ${b?'text-red-500 line-through':'text-white'}">${n}</p><p class="text-[9px] text-gray-500">${users[n].key}</p></div>
-                    <button onclick="ban('${n}', ${b})" class="px-3 py-1 rounded-lg text-[8px] font-black uppercase ${b?'bg-green-600 text-white':'bg-red-600/20 text-red-500'}">${b?'UNBAN':'BAN'}</button>
+                uh += `<div class="p-4 bg-black/20 rounded-2xl flex justify-between items-center border border-white/5">
+                    <div><p class="text-[10px] font-bold ${b?'text-red-500 line-through':'text-white'}">${n.toUpperCase()}</p><p class="text-[8px] text-gray-500 italic">${users[n].key}</p></div>
+                    <button onclick="ban('${n}', ${b})" class="p-2 text-[10px] font-bold uppercase ${b?'text-green-500':'text-red-500'}">${b?'Unban':'Ban'}</button>
                 </div>`;
             }
             document.getElementById('user-list').innerHTML = uh;
         }, 5000);
 
-        async function kill(id) {
-            await fetch(`${API}/commands/${id}.json`, { method:'PUT', body: JSON.stringify({action:'stop'}) });
+        async function ban(u, isBan) {
+            await fetch(`${API}/users/${u}.json`, { method:'PATCH', body: JSON.stringify({status: isBan?'active':'banned'}) });
+            if(!isBan) {
+                const vms = await fetch(`${API}/vms.json`).then(r => r.json()) || {};
+                for(let id in vms) if(vms[id].owner === u) await fetch(`${API}/commands/${id}.json`, { method:'PUT', body: JSON.stringify({action:'stop'}) });
+            }
         }
+        async function kill(id) { await fetch(`${API}/commands/${id}.json`, { method:'PUT', body: JSON.stringify({action:'stop'}) }); }
     </script>
 </body>
 </html>
