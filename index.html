@@ -1,163 +1,577 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZUNRDP | Enterprise Cloud </title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>ZUNRDP CLOUD - NEXT GEN</title>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <style>
-        :root { --bg: #010309; --accent: #3b82f6; }
-        body { background: var(--bg); color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; }
-        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
-        .hero-glow { background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 70%); }
-        .sponsor-logo { filter: grayscale(1) opacity(0.5); transition: 0.3s; cursor: pointer; }
-        .sponsor-logo:hover { filter: grayscale(0) opacity(1); transform: scale(1.1); }
-        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-        .animate-marquee { display: flex; animation: marquee 20s linear infinite; }
+        :root { 
+            --primary: #00f2ea; 
+            --primary-dim: rgba(0, 242, 234, 0.1);
+            --accent: #ff0050; 
+            --bg: #030305; 
+            --card-bg: #101012; 
+            --border: #222;
+            --text: #fff; 
+            --sub: #94969f;
+            --success: #00ff9d;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
+        body { background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; background-image: radial-gradient(circle at top left, #0d1b2a, transparent 40%); }
+
+        /* --- UI COMPONENTS --- */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+
+        .app-header { height: 70px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; background: rgba(5,5,5,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); position: sticky; top: 0; z-index: 100; }
+        .logo { font-weight: 800; font-size: 22px; letter-spacing: -0.5px; color: #fff; display: flex; align-items: center; gap: 8px; }
+        .logo i { color: var(--primary); font-size: 18px; filter: drop-shadow(0 0 8px var(--primary)); }
+        
+        .user-pill { background: rgba(255,255,255,0.05); padding: 6px 14px; border-radius: 30px; display: flex; align-items: center; gap: 10px; border: 1px solid rgba(255,255,255,0.08); transition: 0.3s; cursor: pointer; }
+        .user-pill:active { transform: scale(0.95); background: rgba(255,255,255,0.1); }
+        .avatar { width: 32px; height: 32px; background: linear-gradient(135deg, var(--primary), #00a8a3); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 14px; box-shadow: 0 0 10px var(--primary-dim); }
+
+        .content { flex: 1; overflow-y: auto; padding: 25px 20px 100px 20px; }
+        
+        .card { background: var(--card-bg); border-radius: 24px; padding: 25px; margin-bottom: 20px; border: 1px solid var(--border); position: relative; overflow: hidden; box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5); }
+        .card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%); pointer-events: none; }
+
+        /* --- HOME PAGE REDESIGN --- */
+        .hero-card { text-align: center; padding: 40px 20px; border: 1px solid rgba(0, 242, 234, 0.3); background: linear-gradient(160deg, #0a1014 0%, #000 100%); }
+        .hero-title { font-size: 36px; font-weight: 800; line-height: 1.1; margin-bottom: 10px; letter-spacing: -1px; }
+        .hero-title span { color: transparent; background: linear-gradient(to right, #fff, #999); -webkit-background-clip: text; }
+        .hero-highlight { color: var(--primary); text-shadow: 0 0 20px rgba(0, 242, 234, 0.4); }
+        
+        .feature-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
+        .feature-item { background: rgba(255,255,255,0.03); border-radius: 16px; padding: 20px 15px; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
+        .feature-icon { font-size: 24px; color: var(--primary); margin-bottom: 10px; display: block; }
+        .feature-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 5px; }
+        .feature-desc { font-size: 11px; color: var(--sub); line-height: 1.4; }
+
+        /* --- VPS CARD REDESIGN --- */
+        .vps-card { border: 1px solid #333; transition: 0.3s; }
+        .vps-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; margin-bottom: 15px; }
+        .vps-status { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--success); background: rgba(0, 255, 157, 0.1); padding: 4px 10px; border-radius: 12px; }
+        .dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success); }
+        
+        .info-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 13px; }
+        .info-label { color: var(--sub); display: flex; align-items: center; gap: 8px; }
+        .info-val { font-family: 'Courier New', monospace; font-weight: 600; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 6px; border: 1px solid #222; color: #e0e0e0; }
+        .copy-btn { margin-left: 8px; color: var(--primary); cursor: pointer; opacity: 0.7; transition: 0.2s; }
+        .copy-btn:hover { opacity: 1; transform: scale(1.1); }
+
+        .resource-bar { height: 6px; background: #222; border-radius: 3px; overflow: hidden; margin-top: 5px; }
+        .resource-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #0088cc); border-radius: 3px; width: 0%; transition: width 1s ease; }
+
+        /* --- ADMIN REDESIGN --- */
+        .admin-section { border-left: 3px solid var(--accent); padding-left: 15px; margin: 30px 0 15px; font-size: 18px; font-weight: 800; color: #fff; text-transform: uppercase; letter-spacing: 1px; }
+        .admin-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        
+        /* --- FORMS & BUTTONS --- */
+        .inp-group { position: relative; margin-bottom: 15px; }
+        .inp-box { background: #0a0a0c; border: 1px solid #333; border-radius: 14px; padding: 16px; width: 100%; color: #fff; font-size: 15px; transition: 0.3s; }
+        .inp-box:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 242, 234, 0.1); }
+        .inp-box select { background: transparent; border: none; color: #fff; width: 100%; }
+
+        .btn { width: 100%; padding: 16px; border-radius: 14px; border: none; font-weight: 700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 14px; letter-spacing: 0.5px; position: relative; overflow: hidden; }
+        .btn-primary { background: var(--primary); color: #000; box-shadow: 0 5px 20px rgba(0, 242, 234, 0.2); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0, 242, 234, 0.3); }
+        .btn-outline { background: transparent; border: 1px solid #333; color: var(--sub); }
+        .btn-outline:hover { border-color: #fff; color: #fff; }
+
+        /* --- NAVIGATION --- */
+        .bottom-nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; height: 65px; background: rgba(20, 20, 22, 0.85); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(25px); border-radius: 20px; display: flex; justify-content: space-around; align-items: center; z-index: 100; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .nav-link { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #666; font-size: 20px; transition: 0.3s; width: 50px; height: 50px; border-radius: 15px; }
+        .nav-link.active { color: var(--primary); background: rgba(0, 242, 234, 0.1); box-shadow: 0 0 15px var(--primary-dim); }
+        .nav-link i { margin-bottom: 0; }
+
+        /* --- MODAL --- */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 200; display: none; align-items: flex-end; justify-content: center; opacity: 0; transition: 0.3s; }
+        .modal.open { display: flex; opacity: 1; }
+        .sheet { background: #161618; width: 100%; max-width: 500px; border-radius: 30px 30px 0 0; padding: 40px 30px; border-top: 1px solid #333; transform: translateY(100%); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .modal.open .sheet { transform: translateY(0); }
+
+        .auth-tabs { display: flex; background: #000; padding: 6px; border-radius: 16px; margin-bottom: 25px; border: 1px solid #222; }
+        .tab { flex: 1; padding: 12px; text-align: center; font-size: 13px; font-weight: 700; color: #666; cursor: pointer; transition: 0.3s; border-radius: 12px; }
+        .tab.active { background: #222; color: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+
+        .hidden { display: none !important; }
+        .admin-badge { background: linear-gradient(45deg, #ff0050, #990033); color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 9px; font-weight: 800; margin-left: 5px; box-shadow: 0 0 10px rgba(255, 0, 80, 0.4); }
+        
+        /* Toast Notification */
+        #toast { visibility: hidden; min-width: 250px; background: rgba(20,20,20,0.95); border: 1px solid var(--primary); color: #fff; text-align: center; border-radius: 50px; padding: 12px; position: fixed; z-index: 300; left: 50%; transform: translateX(-50%); bottom: 100px; font-size: 13px; backdrop-filter: blur(10px); }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from {bottom: 80px; opacity: 0;} to {bottom: 100px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 100px; opacity: 1;} to {bottom: 80px; opacity: 0;} }
     </style>
 </head>
-<body class="overflow-x-hidden">
+<body>
 
-    <nav class="fixed top-0 w-full z-50 glass border-b border-white/5 px-6 py-4">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="text-2xl font-black italic tracking-tighter text-blue-500">ZUNRDP<span class="text-white"></span></div>
-            <div class="hidden md:flex gap-8 text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                <a href="#features" class="hover:text-blue-500">Tính năng</a>
-                <a href="#sponsors" class="hover:text-blue-500">Nhà tài trợ</a>
-                <a href="#about" class="hover:text-blue-500">Về chúng tôi</a>
-            </div>
-            <div class="flex gap-4">
-                <button onclick="openModal('login')" class="text-xs font-bold px-5 py-2 hover:text-blue-400">Login</button>
-                <button onclick="openModal('reg')" class="bg-blue-600 px-6 py-2 rounded-full text-xs font-bold shadow-lg shadow-blue-900/40 hover:scale-105 transition">Đăng ký</button>
+    <header class="app-header">
+        <div class="logo"><i class="fas fa-bolt"></i> ZUN<span>CLOUD</span></div>
+        <div class="user-pill" onclick="handleProfileClick()">
+            <div id="u-avatar" class="avatar"><i class="fas fa-user"></i></div>
+            <div style="display:flex; flex-direction:column; gap:2px;">
+                <span id="u-name" style="font-weight:700; font-size:12px; line-height:1;">Đăng nhập</span>
+                <span id="u-role" style="font-size:10px; color:var(--sub); line-height:1;">Khách</span>
             </div>
         </div>
-    </nav>
+    </header>
 
-    <section class="relative min-h-screen flex flex-col items-center justify-center px-6 pt-20 hero-glow">
-        <div class="max-w-4xl mx-auto text-center">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8 animate-bounce">
-                <span class="text-[10px] font-bold tracking-widest text-blue-400 uppercase">🚀 New Version 2026.1 Released</span>
+    <div class="content">
+        
+        <div id="view-home" class="page">
+            <div class="card hero-card">
+                <h1 class="hero-title">Cloud VPS<br><span class="hero-highlight">Automation</span></h1>
+                <p style="color:var(--sub); font-size: 14px; margin-bottom: 25px; max-width: 300px; margin-left: auto; margin-right: auto;">Hệ thống khởi tạo máy chủ Windows 2025 tự động hóa hoàn toàn. Sức mạnh vượt trội, giá thành tối ưu.</p>
+                <button class="btn btn-primary" onclick="switchView('store')">
+                    KHÁM PHÁ CỬA HÀNG <i class="fas fa-arrow-right"></i>
+                </button>
             </div>
-            <h1 class="text-5xl md:text-8xl font-black tracking-tighter mb-8 leading-none bg-clip-text text-transparent bg-gradient-to-b from-white via-gray-200 to-gray-500">
-                CLOUD RDP <br> KHÔNG GIỚI HẠN.
-            </h1>
-            <p class="text-gray-400 text-sm md:text-lg max-w-2xl mx-auto mb-12 leading-relaxed italic">
-                Trải nghiệm hiệu năng vượt trội với công nghệ ảo hóa đám mây thế hệ mới. 
-                Được vận hành trên hạ tầng GitHub Enterprise và bảo mật đa tầng bởi Tailscale.
-            </p>
-            <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
-                <button onclick="openModal('login')" class="w-full sm:w-auto bg-white text-black px-12 py-5 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-500 hover:text-white transition-all">Bắt đầu ngay</button>
-                <div class="flex -space-x-3">
-                    <img src="https://i.pravatar.cc/100?u=1" class="w-10 h-10 rounded-full border-2 border-[#010309]">
-                    <img src="https://i.pravatar.cc/100?u=2" class="w-10 h-10 rounded-full border-2 border-[#010309]">
-                    <img src="https://i.pravatar.cc/100?u=3" class="w-10 h-10 rounded-full border-2 border-[#010309]">
-                    <div class="w-10 h-10 rounded-full bg-blue-600 border-2 border-[#010309] flex items-center justify-center text-[10px] font-bold">+1k</div>
+
+            <h3 style="margin: 30px 0 15px; font-size: 16px; color: #fff;">Tại sao chọn ZunCloud?</h3>
+            <div class="feature-grid">
+                <div class="feature-item">
+                    <i class="fas fa-rocket feature-icon"></i>
+                    <div class="feature-title">Tốc Độ Cao</div>
+                    <div class="feature-desc">Hạ tầng mạng 10Gbps và NVMe SSD đảm bảo hiệu suất.</div>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="sponsors" class="py-20 glass border-y border-white/5">
-        <div class="max-w-7xl mx-auto px-6">
-            <p class="text-center text-[10px] font-black text-blue-500 uppercase tracking-[0.5em] mb-12">Powered by Global Partners</p>
-            <div class="overflow-hidden relative">
-                <div class="animate-marquee flex gap-12 md:gap-24 items-center">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="h-10 sponsor-logo" alt="GitHub">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a8/Microsoft_Azure_Logo.svg" class="h-8 sponsor-logo" alt="Azure">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/0/01/LinkedIn_Logo.svg" class="h-8 sponsor-logo" alt="LinkedIn">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Google_Cloud_Logo.svg" class="h-8 sponsor-logo" alt="Google Cloud">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Tailscale_logo.svg" class="h-8 sponsor-logo" alt="Tailscale">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/1/1d/Amazon_Web_Services_Logo.svg" class="h-8 sponsor-logo" alt="AWS">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="h-10 sponsor-logo">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a8/Microsoft_Azure_Logo.svg" class="h-8 sponsor-logo">
+                <div class="feature-item">
+                    <i class="fas fa-shield-alt feature-icon"></i>
+                    <div class="feature-title">Bảo Mật</div>
+                    <div class="feature-desc">Môi trường riêng biệt, an toàn tuyệt đối cho dữ liệu.</div>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-robot feature-icon"></i>
+                    <div class="feature-title">Tự Động Hóa</div>
+                    <div class="feature-desc">Deploy máy chủ chỉ trong 3-5 phút hoàn toàn tự động.</div>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-headset feature-icon"></i>
+                    <div class="feature-title">Hỗ Trợ 24/7</div>
+                    <div class="feature-desc">Đội ngũ kỹ thuật luôn sẵn sàng hỗ trợ bạn.</div>
                 </div>
             </div>
         </div>
-    </section>
 
-    <section id="features" class="py-32 px-6 max-w-7xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="glass p-10 rounded-[2.5rem] hover:border-blue-500/50 transition">
-                <div class="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center mb-6">
-                    <i class="fas fa-bolt text-blue-500 text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-4">Instant Boot</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">Máy ảo khởi động chỉ trong vòng 3-5 phút sau khi nhận lệnh từ hệ thống trung tâm ZunRDP.</p>
-            </div>
-            <div class="glass p-10 rounded-[2.5rem] hover:border-purple-500/50 transition">
-                <div class="w-14 h-14 bg-purple-500/10 rounded-2xl flex items-center justify-center mb-6">
-                    <i class="fas fa-microchip text-purple-500 text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-4">High Performance</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">Sử dụng CPU Intel Xeon/AMD EPYC từ hạ tầng GitHub Actions Enterprise cực mạnh.</p>
-            </div>
-            <div class="glass p-10 rounded-[2.5rem] hover:border-green-500/50 transition">
-                <div class="w-14 h-14 bg-green-500/10 rounded-2xl flex items-center justify-center mb-6">
-                    <i class="fas fa-network-wired text-green-500 text-2xl"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-4">Smart Connect</h3>
-                <p class="text-gray-500 text-sm leading-relaxed">Kết nối RDP mượt mà không cần mở port (NAT) thông qua công nghệ Tailscale Mesh.</p>
-            </div>
+        <div id="view-store" class="page hidden">
+            <h2 style="margin-bottom:20px; font-weight:800; font-size: 24px;">Cửa Hàng VPS</h2>
+            <div id="product-list-render"></div>
         </div>
-    </section>
 
-    <div id="authModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-6 bg-black/80 backdrop-blur-xl">
-        <div class="glass w-full max-w-sm p-10 rounded-[3rem] relative shadow-2xl">
-            <button onclick="closeModal()" class="absolute top-8 right-8 text-gray-500 hover:text-white transition"><i class="fas fa-times"></i></button>
-            <h2 id="modalTitle" class="text-3xl font-black mb-10 italic tracking-tighter">ZUNRDP.</h2>
-            <div class="space-y-4">
-                <div class="space-y-1">
-                    <label class="text-[9px] font-bold text-gray-500 uppercase ml-2">Tài khoản</label>
-                    <input type="text" id="u" class="w-full p-4 bg-black/40 rounded-2xl border border-white/5 outline-none focus:border-blue-500">
+        <div id="view-vps" class="page hidden">
+            <h2 style="margin-bottom:20px; font-weight:800; font-size: 24px;">Quản Lý Máy Chủ</h2>
+            <p id="vps-loading" style="color:var(--sub); font-size:13px; text-align:center; display:none;">Đang tải dữ liệu...</p>
+            <div id="vps-render" style="padding-bottom: 20px;"></div>
+        </div>
+
+        <div id="view-wallet" class="page hidden">
+            <div class="card" style="background: linear-gradient(135deg, #004d40, #000); border: 1px solid #00695c;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div style="font-size:11px; opacity:0.8; text-transform: uppercase; letter-spacing:1px; margin-bottom:5px;">Số dư khả dụng</div>
+                        <div id="w-balance" style="font-size: 32px; font-weight: 800; color:#fff; text-shadow: 0 0 15px rgba(0,255,157,0.3);">0 đ</div>
+                    </div>
+                    <i class="fas fa-wallet" style="font-size:40px; color:rgba(255,255,255,0.1);"></i>
                 </div>
-                <div class="space-y-1">
-                    <label class="text-[9px] font-bold text-gray-500 uppercase ml-2">Mật khẩu</label>
-                    <input type="password" id="p" class="w-full p-4 bg-black/40 rounded-2xl border border-white/5 outline-none focus:border-blue-500">
+                <div style="font-size: 12px; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; color: var(--sub);">
+                    Tài khoản: <span id="w-email" style="color:#fff;">...</span> <span id="w-admin"></span>
                 </div>
-                <button onclick="handleAuth()" id="modalBtn" class="w-full py-5 bg-blue-600 rounded-2xl font-black text-xs uppercase tracking-[0.2em] mt-6 shadow-xl shadow-blue-900/40">Tiếp tục</button>
             </div>
+
+            <h3 style="margin: 20px 0 15px; font-size: 16px;">Nạp Tiền</h3>
+            <div class="card">
+                <input class="inp-box" type="text" id="gift-code-input" placeholder="Nhập mã Giftcode..." style="margin-bottom: 15px;">
+                <button class="btn btn-primary" onclick="useGiftcode()">
+                    <i class="fas fa-check-circle"></i> KÍCH HOẠT NGAY
+                </button>
+            </div>
+
+            <div id="admin-panel" class="hidden">
+                <div class="admin-section"><i class="fas fa-user-shield"></i> Admin Control</div>
+
+                <div class="card" style="border-color: var(--accent);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:15px; color:var(--accent);">
+                        <h4 style="font-weight:700">Tạo Giftcode</h4>
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <input class="inp-box" id="adm-gift-code" placeholder="Mã code (VD: TET2025)" style="margin-bottom:10px;">
+                    <div class="inp-group">
+                        <div class="inp-box">
+                            <select id="adm-gift-val">
+                                <option value="">-- Chọn mệnh giá --</option>
+                                <option value="10000">10.000 VNĐ</option>
+                                <option value="20000">20.000 VNĐ</option>
+                                <option value="50000">50.000 VNĐ</option>
+                                <option value="100000">100.000 VNĐ</option>
+                                <option value="200000">200.000 VNĐ</option>
+                                <option value="500000">500.000 VNĐ</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn" style="background:var(--accent); color:#fff;" onclick="adminCreateGiftcode()">TẠO MÃ</button>
+                </div>
+
+                <div class="card" style="border-color: var(--primary);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:15px; color:var(--primary);">
+                        <h4 style="font-weight:700">Cấu Hình Sản Phẩm</h4>
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <input class="inp-box" id="adm-p-name" placeholder="Tên hiển thị" style="margin-bottom:10px;">
+                    <input class="inp-box" id="adm-p-price" type="number" placeholder="Giá tiền" style="margin-bottom:10px;">
+                    <input class="inp-box" id="adm-p-token" placeholder="GitHub Token" style="margin-bottom:10px;">
+                    <input class="inp-box" id="adm-p-repo" placeholder="Repo (User/Repo)" style="margin-bottom:15px;">
+                    <button class="btn btn-primary" onclick="adminCreateProduct()">CẬP NHẬT / THÊM MỚI</button>
+                </div>
+
+                <div class="admin-section"><i class="fas fa-desktop"></i> Giám sát toàn hệ thống</div>
+                <div id="admin-vps-all"></div>
+            </div>
+
+            <button class="btn btn-outline" style="margin-top:30px; border-color:#333; color:#666;" onclick="doLogout()">
+                <i class="fas fa-sign-out-alt"></i> ĐĂNG XUẤT
+            </button>
         </div>
     </div>
 
-    <footer id="about" class="py-20 text-center border-t border-white/5">
-        <p class="text-gray-600 text-[10px] font-bold uppercase tracking-[0.3em]">© 2026 ZunRdp Cloud Infrastructure. All Rights Reserved.</p>
-    </footer>
+    <nav class="bottom-nav">
+        <a href="#" class="nav-link active" onclick="switchView('home', this)"><i class="fas fa-home"></i></a>
+        <a href="#" class="nav-link" onclick="switchView('store', this)"><i class="fas fa-shopping-bag"></i></a>
+        <a href="#" class="nav-link" onclick="switchView('vps', this)"><i class="fas fa-server"></i></a>
+        <a href="#" class="nav-link" onclick="switchView('wallet', this)"><i class="fas fa-wallet"></i></a>
+    </nav>
+
+    <div class="modal" id="auth-modal">
+        <div class="sheet">
+            <h2 style="text-align:center; margin-bottom:20px; font-weight:800;">Xác Thực</h2>
+            <div class="auth-tabs">
+                <div class="tab active" id="t-login" onclick="setAuthMode('login')">ĐĂNG NHẬP</div>
+                <div class="tab" id="t-reg" onclick="setAuthMode('register')">ĐĂNG KÝ</div>
+            </div>
+            <input class="inp-box" id="auth-u" placeholder="Tên tài khoản..." style="margin-bottom:10px;">
+            <input class="inp-box" id="auth-p" type="password" placeholder="Mật khẩu..." style="margin-bottom:20px;">
+            <button class="btn btn-primary" onclick="runAuth()">TIẾP TỤC <i class="fas fa-arrow-right"></i></button>
+            <button class="btn btn-outline" style="margin-top:10px; border:none;" onclick="closeAuth()">Đóng</button>
+        </div>
+    </div>
+
+    <div id="toast">Thông báo</div>
 
     <script>
-        const API = "https://zunrdp-default-rtdb.asia-southeast1.firebasedatabase.app";
-        let mode = 'login';
-
-        function openModal(m) {
-            mode = m;
-            document.getElementById('authModal').classList.remove('hidden');
-            document.getElementById('modalTitle').innerText = m === 'login' ? 'LOGIN' : 'REGISTER';
+        // --- HELPER UI FUNCTIONS ---
+        function showToast(msg) {
+            const x = document.getElementById("toast");
+            x.innerText = msg;
+            x.className = "show";
+            setTimeout(() => { x.className = x.className.replace("show", ""); }, 3000);
         }
-        function closeModal() { document.getElementById('authModal').classList.add('hidden'); }
 
-        async function handleAuth() {
-            const u = document.getElementById('u').value.trim().toLowerCase();
-            const p = document.getElementById('p').value;
-            if(!u || !p) return alert("Nhập đủ thông tin!");
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => showToast("Đã sao chép: " + text));
+        }
 
-            if(mode === 'login') {
-                if(u === 'zunrdp' && p === '26082007ngoc') {
-                    localStorage.setItem('admin', 'true');
-                    window.location.href = 'admin.html';
-                } else {
-                    const res = await fetch(`${API}/users/${u}.json`).then(r => r.json());
-                    if(res && res.password === p) {
-                        if(res.status === 'banned') return alert("Bạn đã bị BAN!");
-                        localStorage.setItem('user', u);
-                        window.location.href = 'member.html';
-                    } else alert("Sai tài khoản!");
-                }
+        function handleProfileClick() {
+            if(!currentUser) openAuth();
+            else switchView('wallet');
+        }
+
+        function switchView(viewId, el) {
+            // Hide all views
+            document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+            // Show selected
+            document.getElementById('view-' + viewId).classList.remove('hidden');
+            
+            // Update nav
+            if(el) {
+                document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+                el.classList.add('active');
             } else {
-                const check = await fetch(`${API}/users/${u}.json`).then(r => r.json());
-                if(check) return alert("Tài khoản đã tồn tại!");
-                await fetch(`${API}/users/${u}.json`, { method:'PUT', body: JSON.stringify({password:p, status:'active', key:'WAITING', limit:1}) });
-                alert("Đăng ký thành công!");
-                openModal('login');
+                 // Auto update nav if switched programmatically
+                 const index = ['home', 'store', 'vps', 'wallet'].indexOf(viewId);
+                 if(index >= 0) {
+                     document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+                     document.querySelectorAll('.nav-link')[index].classList.add('active');
+                 }
             }
+        }
+
+        // --- FIREBASE CONFIG & LOGIC (GIỮ NGUYÊN) ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBrKWSjYj7x8gUKPXUyHKTidAFtOIa5ul4",
+            authDomain: "zunrdp.firebaseapp.com",
+            databaseURL: "https://zunrdp-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "zunrdp",
+            storageBucket: "zunrdp.firebasestorage.app",
+            messagingSenderId: "147267232968",
+            appId: "1:147267232968:web:4354280b9db538026831fd"
+        };
+        
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        let currentUser = null;
+        let isAdmin = false;
+
+        const toEmail = (u) => u.includes('@') ? u : u + "@zun.com";
+        const toName = (e) => e.replace("@zun.com", "");
+
+        function openAuth() { document.getElementById('auth-modal').classList.add('open'); }
+        function closeAuth() { document.getElementById('auth-modal').classList.remove('open'); }
+        function setAuthMode(m) { 
+            document.getElementById('t-login').className = m === 'login' ? 'tab active' : 'tab'; 
+            document.getElementById('t-reg').className = m === 'register' ? 'tab active' : 'tab'; 
+        }
+
+        function doLogout() {
+            auth.signOut().then(() => {
+                showToast("Đã đăng xuất");
+                switchView('home');
+            });
+        }
+
+        async function runAuth() {
+            const u = document.getElementById('auth-u').value.trim();
+            const p = document.getElementById('auth-p').value.trim();
+            if(!u || !p) return showToast("Vui lòng điền đủ thông tin!");
+            const e = toEmail(u);
+            const isLogin = document.getElementById('t-login').classList.contains('active');
+            try {
+                if(isLogin) { await auth.signInWithEmailAndPassword(e, p); }
+                else { 
+                    const res = await auth.createUserWithEmailAndPassword(e, p);
+                    await db.ref('users/' + res.user.uid).set({ email: e, balance: 0, role: 'user', banned: false });
+                }
+                closeAuth();
+                showToast(isLogin ? "Đăng nhập thành công" : "Đăng ký thành công");
+            } catch(err) { showToast(err.message); }
+        }
+
+        auth.onAuthStateChanged(user => {
+            if(user) {
+                db.ref('users/' + user.uid).on('value', snap => {
+                    const d = snap.val();
+                    if(!d || d.banned) { if(d?.banned) alert("Tài khoản đã bị BAN!"); auth.signOut(); return; }
+                    currentUser = user; isAdmin = d.role === 'admin';
+                    const name = toName(user.email);
+                    
+                    document.getElementById('u-name').innerText = name;
+                    document.getElementById('u-role').innerText = isAdmin ? 'Administrator' : 'Thành viên';
+                    document.getElementById('u-avatar').innerHTML = `<span>${name[0].toUpperCase()}</span>`;
+                    document.getElementById('w-email').innerText = name;
+                    document.getElementById('w-balance').innerText = d.balance.toLocaleString() + " đ";
+                    
+                    if(isAdmin) {
+                        document.getElementById('w-admin').innerHTML = '<span class="admin-badge">ADMIN</span>';
+                        document.getElementById('admin-panel').classList.remove('hidden');
+                        loadAdminAllVms();
+                    }
+                });
+                loadUserVms();
+                loadProducts();
+            } else {
+                currentUser = null;
+                document.getElementById('u-name').innerText = "Đăng nhập";
+                document.getElementById('u-role').innerText = "Khách";
+                document.getElementById('u-avatar').innerHTML = '<i class="fas fa-user"></i>';
+                document.getElementById('admin-panel').classList.add('hidden');
+            }
+        });
+
+        // LOAD PRODUCTS (STORE)
+        function loadProducts() {
+            db.ref('products').on('value', snap => {
+                const render = document.getElementById('product-list-render');
+                render.innerHTML = "";
+                snap.forEach(c => {
+                    const p = c.val();
+                    render.innerHTML += `
+                        <div class="card" style="border-left: 4px solid var(--primary);">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start">
+                                <div>
+                                    <h4 style="font-size:18px; font-weight:800; color:#fff;">${p.name}</h4>
+                                    <p style="font-size:12px; color:var(--sub); margin-top:4px;">Token: ${c.key}</p>
+                                </div>
+                                <div style="text-align:right;">
+                                    <span style="color:var(--success); font-weight:800; font-size:18px; text-shadow:0 0 10px rgba(0,255,157,0.3)">${p.price.toLocaleString()}đ</span>
+                                </div>
+                            </div>
+                            <div style="margin-top:15px; margin-bottom:15px;">
+                                <input class="inp-box" id="key-${c.key}" placeholder="Nhập Key Tailscale của bạn..." style="font-size:13px; padding:12px;">
+                            </div>
+                            <button class="btn btn-primary" onclick="deployVM('${c.key}', ${p.price}, '${p.token}', '${p.repo}')">
+                                <i class="fas fa-bolt"></i> THUÊ NGAY
+                            </button>
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        // DEPLOY FUNCTION
+        async function deployVM(pId, price, token, repo) {
+            if(!currentUser) return openAuth();
+            const tsKey = document.getElementById('key-' + pId).value.trim();
+            if(!tsKey) return showToast("Vui lòng nhập Key Tailscale!");
+
+            const userSnap = await db.ref('users/' + currentUser.uid).once('value');
+            const bal = userSnap.val().balance || 0;
+            if(bal < price) return showToast("Số dư không đủ! Vui lòng nạp thêm.");
+
+            if(confirm(`Xác nhận thuê gói này với giá ${price.toLocaleString()}đ?`)) {
+                try {
+                    const res = await fetch(`https://api.github.com/repos/${repo}/dispatches`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ event_type: "vps_request", client_payload: { owner_name: toName(currentUser.email), ts_key: tsKey } })
+                    });
+                    if(res.ok) {
+                        db.ref('users/' + currentUser.uid).update({ balance: bal - price });
+                        showToast("Đã gửi lệnh khởi tạo thành công!"); 
+                        switchView('vps');
+                    } else showToast("Lỗi: GitHub không phản hồi!");
+                } catch(e) { showToast("Lỗi kết nối mạng!"); }
+            }
+        }
+
+        // GIFTCODE FUNCTION
+        function useGiftcode() {
+            if(!currentUser) return openAuth();
+            const code = document.getElementById('gift-code-input').value.trim();
+            if(!code) return showToast("Chưa nhập mã!");
+            
+            db.ref('giftcodes/' + code).once('value', snap => {
+                if(snap.exists()) {
+                    const amt = snap.val().amount;
+                    db.ref('users/' + currentUser.uid).once('value', uSnap => {
+                        const curBal = uSnap.val().balance || 0;
+                        db.ref('users/' + currentUser.uid).update({ balance: curBal + amt });
+                        db.ref('giftcodes/' + code).remove();
+                        showToast(`Nạp thành công ${amt.toLocaleString()}đ`);
+                        document.getElementById('gift-code-input').value = "";
+                    });
+                } else showToast("Mã không tồn tại hoặc đã sử dụng!");
+            });
+        }
+
+        // ADMIN FUNCTIONS
+        function adminCreateProduct() {
+            const name = document.getElementById('adm-p-name').value;
+            const price = parseInt(document.getElementById('adm-p-price').value);
+            const token = document.getElementById('adm-p-token').value;
+            const repo = document.getElementById('adm-p-repo').value;
+            if(name && price && token && repo) {
+                db.ref('products/' + Date.now()).set({ name, price, token, repo }).then(() => {
+                    showToast("Đã cập nhật sản phẩm!");
+                    // Clear inputs could go here
+                });
+            } else showToast("Thiếu thông tin!");
+        }
+
+        function adminCreateGiftcode() {
+            const code = document.getElementById('adm-gift-code').value.trim();
+            const amt = parseInt(document.getElementById('adm-gift-val').value);
+            if(!code || !amt) return showToast("Vui lòng nhập mã và chọn mệnh giá!");
+            db.ref('giftcodes/' + code).set({ amount: amt }).then(() => {
+                showToast("Tạo mã thành công: " + code);
+                document.getElementById('adm-gift-code').value = "";
+            });
+        }
+
+        // VPS RENDERERS
+        function loadUserVms() {
+            const render = document.getElementById('vps-render');
+            const loading = document.getElementById('vps-loading');
+            loading.style.display = 'block';
+            
+            db.ref('vms').on('value', snap => {
+                loading.style.display = 'none';
+                render.innerHTML = "";
+                let hasItem = false;
+                snap.forEach(c => {
+                    const v = c.val();
+                    if(v.owner === toName(currentUser.email)) {
+                        render.innerHTML += renderVmCard(v, false);
+                        hasItem = true;
+                    }
+                });
+                if(!hasItem) render.innerHTML = `<div style="text-align:center; color:var(--sub); margin-top:50px;"><i class="fas fa-server" style="font-size:40px; margin-bottom:10px; opacity:0.3"></i><br>Bạn chưa có máy chủ nào.</div>`;
+            });
+        }
+
+        function loadAdminAllVms() {
+            db.ref('vms').on('value', snap => {
+                const render = document.getElementById('admin-vps-all');
+                render.innerHTML = "";
+                snap.forEach(c => { render.innerHTML += renderVmCard(c.val(), true); });
+            });
+        }
+
+        // NEW CARD DESIGN RENDER
+        function renderVmCard(v, admin) {
+            // Fake metrics for visual appeal if not provided
+            const cpu = v.cpu || Math.floor(Math.random() * 40) + 10;
+            const ram = v.ram || Math.floor(Math.random() * 60) + 20;
+            
+            return `
+                <div class="card vps-card">
+                    <div class="vps-header">
+                        <div>
+                            <div style="font-weight:800; font-size:16px; color:#fff;">WIN-VPS-${v.id.substring(0,4).toUpperCase()}</div>
+                            <div style="font-size:11px; color:var(--sub);">Owner: ${v.owner}</div>
+                        </div>
+                        <div class="vps-status">
+                            <div class="dot"></div> Running
+                        </div>
+                    </div>
+                    
+                    <div class="info-row">
+                        <div class="info-label"><i class="fas fa-network-wired"></i> IP Address</div>
+                        <div style="display:flex; align-items:center">
+                            <span class="info-val">${v.ip || 'Pending...'}</span>
+                            <i class="fas fa-copy copy-btn" onclick="copyToClipboard('${v.ip || ''}')"></i>
+                        </div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label"><i class="fas fa-user"></i> Username</div>
+                        <div style="display:flex; align-items:center">
+                            <span class="info-val">${v.user}</span>
+                            <i class="fas fa-copy copy-btn" onclick="copyToClipboard('${v.user}')"></i>
+                        </div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label"><i class="fas fa-key"></i> Password</div>
+                        <div style="display:flex; align-items:center">
+                            <span class="info-val">********</span>
+                            <i class="fas fa-copy copy-btn" onclick="copyToClipboard('${v.pass}')"></i>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:20px;">
+                        <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--sub); margin-bottom:3px;">
+                            <span>CPU Usage</span> <span>${cpu}%</span>
+                        </div>
+                        <div class="resource-bar"><div class="resource-fill" style="width:${cpu}%"></div></div>
+                        
+                        <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--sub); margin-bottom:3px; margin-top:8px;">
+                            <span>RAM Usage</span> <span>${ram}%</span>
+                        </div>
+                        <div class="resource-bar"><div class="resource-fill" style="width:${ram}%; background: linear-gradient(90deg, #ff0050, #ff6b00);"></div></div>
+                    </div>
+                    
+                    ${admin ? `<div style="margin-top:15px; border-top:1px solid #333; padding-top:10px; text-align:right;">
+                        <button style="background:var(--accent); border:none; color:white; padding:5px 10px; border-radius:5px; font-size:10px; font-weight:bold; cursor:pointer">DELETE</button>
+                    </div>` : ''}
+                </div>
+            `;
         }
     </script>
 </body>
