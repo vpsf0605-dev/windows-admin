@@ -2,50 +2,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZUNRDP | The Future of Cloud</title>
+    <title>ZUNRDP | Enterprise Cloud Infrastructure</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --bg: #030712; --accent: #3b82f6; }
-        body { background: var(--bg); color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; }
-        .bg-grid { background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0); background-size: 40px 40px; }
-        .glow-btn { box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); transition: 0.4s; }
-        .glow-btn:hover { box-shadow: 0 0 40px rgba(59, 130, 246, 0.6); transform: scale(1.05); }
-        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
-        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .animate-up { animation: slideUp 0.8s ease-out forwards; }
+        :root { --bg: #010309; --accent: #3b82f6; }
+        body { background: var(--bg); color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; scroll-behavior: smooth; }
+        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
+        .hero-glow { background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 70%); }
+        .sponsor-logo { filter: grayscale(1) opacity(0.5); transition: 0.3s; cursor: pointer; }
+        .sponsor-logo:hover { filter: grayscale(0) opacity(1); transform: scale(1.1); }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .animate-marquee { display: flex; animation: marquee 20s linear infinite; }
     </style>
 </head>
-<body class="bg-grid">
-    <main class="min-h-screen flex flex-col items-center justify-center px-6 text-center">
-        <div class="animate-up">
-            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8">
-                <span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span></span>
-                <span class="text-[10px] font-bold tracking-widest text-blue-400 uppercase">System Online 2026</span>
+<body class="overflow-x-hidden">
+
+    <nav class="fixed top-0 w-full z-50 glass border-b border-white/5 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="text-2xl font-black italic tracking-tighter text-blue-500">ZUNRDP<span class="text-white">.</span></div>
+            <div class="hidden md:flex gap-8 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                <a href="#features" class="hover:text-blue-500">Tính năng</a>
+                <a href="#sponsors" class="hover:text-blue-500">Nhà tài trợ</a>
+                <a href="#about" class="hover:text-blue-500">Về chúng tôi</a>
             </div>
-            <h1 class="text-6xl md:text-8xl font-black tracking-tighter mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-500">
-                CLOUD<br>ZUNRDP.
-            </h1>
-            <p class="text-gray-400 max-w-md mx-auto mb-10 text-sm leading-relaxed">Hệ thống máy ảo Windows tốc độ cao, quản lý thông minh trên mọi thiết bị di động.</p>
-            
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <button onclick="openModal('login')" class="glow-btn bg-blue-600 px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-widest">Đăng Nhập</button>
-                <button onclick="openModal('reg')" class="glass px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-widest border-white/20">Đăng Ký</button>
+            <div class="flex gap-4">
+                <button onclick="openModal('login')" class="text-xs font-bold px-5 py-2 hover:text-blue-400">Login</button>
+                <button onclick="openModal('reg')" class="bg-blue-600 px-6 py-2 rounded-full text-xs font-bold shadow-lg shadow-blue-900/40 hover:scale-105 transition">Đăng ký</button>
             </div>
         </div>
-    </main>
+    </nav>
 
-    <div id="authModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-6 bg-black/80 backdrop-blur-md">
-        <div class="glass w-full max-w-sm p-8 rounded-[2.5rem] relative scale-up">
-            <button onclick="closeModal()" class="absolute top-6 right-6 text-gray-500"><i class="fas fa-times"></i></button>
-            <h2 id="modalTitle" class="text-2xl font-black mb-8 italic">WELCOME</h2>
+    <section class="relative min-h-screen flex flex-col items-center justify-center px-6 pt-20 hero-glow">
+        <div class="max-w-4xl mx-auto text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8 animate-bounce">
+                <span class="text-[10px] font-bold tracking-widest text-blue-400 uppercase">🚀 New Version 2026.1 Released</span>
+            </div>
+            <h1 class="text-5xl md:text-8xl font-black tracking-tighter mb-8 leading-none bg-clip-text text-transparent bg-gradient-to-b from-white via-gray-200 to-gray-500">
+                CLOUD RDP <br> KHÔNG GIỚI HẠN.
+            </h1>
+            <p class="text-gray-400 text-sm md:text-lg max-w-2xl mx-auto mb-12 leading-relaxed italic">
+                Trải nghiệm hiệu năng vượt trội với công nghệ ảo hóa đám mây thế hệ mới. 
+                Được vận hành trên hạ tầng GitHub Enterprise và bảo mật đa tầng bởi Tailscale.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-6 justify-center items-center">
+                <button onclick="openModal('login')" class="w-full sm:w-auto bg-white text-black px-12 py-5 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-500 hover:text-white transition-all">Bắt đầu ngay</button>
+                <div class="flex -space-x-3">
+                    <img src="https://i.pravatar.cc/100?u=1" class="w-10 h-10 rounded-full border-2 border-[#010309]">
+                    <img src="https://i.pravatar.cc/100?u=2" class="w-10 h-10 rounded-full border-2 border-[#010309]">
+                    <img src="https://i.pravatar.cc/100?u=3" class="w-10 h-10 rounded-full border-2 border-[#010309]">
+                    <div class="w-10 h-10 rounded-full bg-blue-600 border-2 border-[#010309] flex items-center justify-center text-[10px] font-bold">+1k</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="sponsors" class="py-20 glass border-y border-white/5">
+        <div class="max-w-7xl mx-auto px-6">
+            <p class="text-center text-[10px] font-black text-blue-500 uppercase tracking-[0.5em] mb-12">Powered by Global Partners</p>
+            <div class="overflow-hidden relative">
+                <div class="animate-marquee flex gap-12 md:gap-24 items-center">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="h-10 sponsor-logo" alt="GitHub">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a8/Microsoft_Azure_Logo.svg" class="h-8 sponsor-logo" alt="Azure">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/0/01/LinkedIn_Logo.svg" class="h-8 sponsor-logo" alt="LinkedIn">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Google_Cloud_Logo.svg" class="h-8 sponsor-logo" alt="Google Cloud">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/b/b1/Tailscale_logo.svg" class="h-8 sponsor-logo" alt="Tailscale">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/1/1d/Amazon_Web_Services_Logo.svg" class="h-8 sponsor-logo" alt="AWS">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Octicons-mark-github.svg" class="h-10 sponsor-logo">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a8/Microsoft_Azure_Logo.svg" class="h-8 sponsor-logo">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="py-32 px-6 max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="glass p-10 rounded-[2.5rem] hover:border-blue-500/50 transition">
+                <div class="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center mb-6">
+                    <i class="fas fa-bolt text-blue-500 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-4">Instant Boot</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Máy ảo khởi động chỉ trong vòng 3-5 phút sau khi nhận lệnh từ hệ thống trung tâm ZunRDP.</p>
+            </div>
+            <div class="glass p-10 rounded-[2.5rem] hover:border-purple-500/50 transition">
+                <div class="w-14 h-14 bg-purple-500/10 rounded-2xl flex items-center justify-center mb-6">
+                    <i class="fas fa-microchip text-purple-500 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-4">High Performance</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Sử dụng CPU Intel Xeon/AMD EPYC từ hạ tầng GitHub Actions Enterprise cực mạnh.</p>
+            </div>
+            <div class="glass p-10 rounded-[2.5rem] hover:border-green-500/50 transition">
+                <div class="w-14 h-14 bg-green-500/10 rounded-2xl flex items-center justify-center mb-6">
+                    <i class="fas fa-network-wired text-green-500 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-4">Smart Connect</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Kết nối RDP mượt mà không cần mở port (NAT) thông qua công nghệ Tailscale Mesh.</p>
+            </div>
+        </div>
+    </section>
+
+    <div id="authModal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-6 bg-black/80 backdrop-blur-xl">
+        <div class="glass w-full max-w-sm p-10 rounded-[3rem] relative shadow-2xl">
+            <button onclick="closeModal()" class="absolute top-8 right-8 text-gray-500 hover:text-white transition"><i class="fas fa-times"></i></button>
+            <h2 id="modalTitle" class="text-3xl font-black mb-10 italic tracking-tighter">ZUNRDP.</h2>
             <div class="space-y-4">
-                <input type="text" id="u" placeholder="Username" class="w-full p-4 bg-black/40 rounded-2xl border border-white/10 outline-none focus:border-blue-500">
-                <input type="password" id="p" placeholder="Password" class="w-full p-4 bg-black/40 rounded-2xl border border-white/10 outline-none focus:border-blue-500">
-                <button onclick="handleAuth()" id="modalBtn" class="w-full py-5 bg-blue-600 rounded-2xl font-bold uppercase text-[10px] glow-btn">Xác nhận</button>
+                <div class="space-y-1">
+                    <label class="text-[9px] font-bold text-gray-500 uppercase ml-2">Tài khoản</label>
+                    <input type="text" id="u" class="w-full p-4 bg-black/40 rounded-2xl border border-white/5 outline-none focus:border-blue-500">
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[9px] font-bold text-gray-500 uppercase ml-2">Mật khẩu</label>
+                    <input type="password" id="p" class="w-full p-4 bg-black/40 rounded-2xl border border-white/5 outline-none focus:border-blue-500">
+                </div>
+                <button onclick="handleAuth()" id="modalBtn" class="w-full py-5 bg-blue-600 rounded-2xl font-black text-xs uppercase tracking-[0.2em] mt-6 shadow-xl shadow-blue-900/40">Tiếp tục</button>
             </div>
         </div>
     </div>
+
+    <footer id="about" class="py-20 text-center border-t border-white/5">
+        <p class="text-gray-600 text-[10px] font-bold uppercase tracking-[0.3em]">© 2026 ZunRdp Cloud Infrastructure. All Rights Reserved.</p>
+    </footer>
 
     <script>
         const API = "https://zunrdp-default-rtdb.asia-southeast1.firebasedatabase.app";
@@ -54,7 +130,7 @@
         function openModal(m) {
             mode = m;
             document.getElementById('authModal').classList.remove('hidden');
-            document.getElementById('modalTitle').innerText = m === 'login' ? 'ĐĂNG NHẬP' : 'ĐĂNG KÝ';
+            document.getElementById('modalTitle').innerText = m === 'login' ? 'LOGIN' : 'REGISTER';
         }
         function closeModal() { document.getElementById('authModal').classList.add('hidden'); }
 
@@ -77,8 +153,8 @@
                 }
             } else {
                 const check = await fetch(`${API}/users/${u}.json`).then(r => r.json());
-                if(check) return alert("Tài khoản đã có!");
-                await fetch(`${API}/users/${u}.json`, { method:'PUT', body: JSON.stringify({password:p, status:'active', key:'CHỜ CẤP', limit:1}) });
+                if(check) return alert("Tài khoản đã tồn tại!");
+                await fetch(`${API}/users/${u}.json`, { method:'PUT', body: JSON.stringify({password:p, status:'active', key:'WAITING', limit:1}) });
                 alert("Đăng ký thành công!");
                 openModal('login');
             }
